@@ -21,7 +21,7 @@ switch ($mode.ToLower()) {
             New-Item -ItemType Directory -Path $BUILD_DIR | Out-Null
         }
         Write-Host "Building in Debug mode..."
-        cmake -B $BUILD_DIR -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug
+        cmake -B $BUILD_DIR -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         cmake --build $BUILD_DIR
         break
     }
@@ -31,7 +31,7 @@ switch ($mode.ToLower()) {
             New-Item -ItemType Directory -Path $BUILD_DIR | Out-Null
         }
         Write-Host "Building in Release mode..."
-        cmake -B $BUILD_DIR -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+        cmake -B $BUILD_DIR -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         cmake --build $BUILD_DIR
         break
     }
@@ -42,7 +42,7 @@ switch ($mode.ToLower()) {
             New-Item -ItemType Directory -Path $BUILD_DIR | Out-Null
         }
         Write-Host "Building in Debug mode..."
-        cmake -B $BUILD_DIR -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug
+        cmake -B $BUILD_DIR -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         cmake --build $BUILD_DIR
 
         # Run the executable

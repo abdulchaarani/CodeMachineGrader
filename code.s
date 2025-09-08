@@ -42,6 +42,7 @@ f: 4   # nums[n - 1]
 
 n: 6 # nbr elements dans nums
 target: 2
+result: 0
 
 one: 1
 count: 0
