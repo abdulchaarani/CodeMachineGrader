@@ -1,0 +1,13 @@
+{
+  "configurations": [
+    {
+      "name": "Win64",
+      "compilerPath": "C:/msys64/ucrt64/bin/clang++.exe",
+      "cStandard": "c17",
+      "cppStandard": "c++23",
+      "intelliSenseMode": "windows-clang-x64",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+    }
+  ],
+  "version": 4
+}
