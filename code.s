@@ -1,18 +1,15 @@
 .text
-# Mem[pointeur] == target ?
-compare:
+# Mem[val + offset] 
+tally:
 lda pointeur
 ldi
-sub target
-brnz incrementcount
-
-# ++compteur
-addone:
-ld result
+add offset
+st temp
+lda temp
+ldi
 add one
-st result
+sti
 
-# incrementer decompte
 incrementcount:
 ld count
 add one
@@ -25,26 +22,29 @@ incrementptr:
 lda pointeur
 adda one
 sta pointeur
-br compare
+br tally
 
 end:
-ld result
 stop
 
+# NE RIEN MODIFIER EN DESSOUS DE CETTE LIGNE
 .data
-# nums
+#nums
 a: 1   # nums[0]
 b: 2   # nums[1]
-c: 3   # nums[2]
-d: 2   # nums[3]
-e: 2   # nums[4]
-f: 4   # nums[n - 1]
+c: 2   # nums[2]
+d: 3   # nums[3]
+e: 1   # nums[n - 1]
 
-n: 6 # nbr elements dans nums
-target: 2
-result: 0
+n: 5 # nbr elements dans nums
+# NE RIEN MODIFIER AU DESSUS DE CETTE LIGNE
 
 one: 1
 count: 0
+
 # adresse debut du tableau
-pointeur: 18 # Peut être codé en dur
+pointeur: 18 #  Peut être codé en dur
+
+# offset vers une portion inutilisée de la memoire principale 
+offset: 100
+temp: 0

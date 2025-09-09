@@ -43,9 +43,14 @@ switch ($mode.ToLower()) {
         }
         Write-Host "Building in Debug mode..."
         cmake -B $BUILD_DIR -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-        cmake --build $BUILD_DIR
 
-        # Run the executable
+        $buildResult = cmake --build $BUILD_DIR
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Build failed. Aborting execution."
+            exit $LASTEXITCODE
+        }
+
+        # Run the executable only if build succeeded
         $exePath = Join-Path $BUILD_DIR $EXE_NAME
         if (Test-Path $exePath) {
             Write-Host "Running $EXE_NAME..."
