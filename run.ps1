@@ -1,9 +1,9 @@
 param(
-    [string]$mode = "debug"   # default mode is debug, can also pass "release", "clean", or "run"
+    [string]$mode = "debug"
 )
 
 $BUILD_DIR = "build"
-$EXE_NAME = "code_machine_grader.exe"  # your executable
+$EXE_NAME = "code_machine_grader.exe"
 
 switch ($mode.ToLower()) {
     "clean" {
@@ -37,7 +37,6 @@ switch ($mode.ToLower()) {
     }
 
     "run" {
-        # Build first in Debug mode
         if (!(Test-Path $BUILD_DIR)) {
             New-Item -ItemType Directory -Path $BUILD_DIR | Out-Null
         }
@@ -50,7 +49,6 @@ switch ($mode.ToLower()) {
             exit $LASTEXITCODE
         }
 
-        # Run the executable only if build succeeded
         $exePath = Join-Path $BUILD_DIR $EXE_NAME
         if (Test-Path $exePath) {
             Write-Host "Running $EXE_NAME..."

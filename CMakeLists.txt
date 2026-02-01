@@ -1,18 +1,24 @@
 cmake_minimum_required(VERSION 3.20)
 project(CodeMachineGrader LANGUAGES CXX)
 
-# Require C++23
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Executable
+# Enable compile commands for IntelliSense
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 add_executable(code_machine_grader main.cpp)
 
-# Force console app (important for MinGW)
 set_target_properties(code_machine_grader PROPERTIES WIN32_EXECUTABLE OFF)
 
-# Compiler warnings for GCC/Clang
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(code_machine_grader PRIVATE -Wall -Wextra -Wpedantic -municode)
+    target_compile_options(code_machine_grader PRIVATE 
+        -Wall 
+        -Wextra 
+        -Wpedantic 
+        -Wunicode
+        $<$<CONFIG:Debug>:-g3>
+        $<$<CONFIG:Debug>:-O0>
+    )
 endif()

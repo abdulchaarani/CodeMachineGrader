@@ -5,7 +5,5 @@ class Instruction {
 };
 
 class Add : public Instruction {
-  void execute() override {
-    
-  }
-}
+    void execute() override {}
+};

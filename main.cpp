@@ -40,8 +40,20 @@ std::unordered_map<std::string, uint8_t> opcodeMap = {
 
 // clang-format on
 
-int main() {
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <filepath>\n";
+        return 1;
+    }
+
+    const std::string codePath{argv[1]};
+
+    if (!std::filesystem::exists(codePath)) {
+        std::cerr << "Error: File '" << codePath << "' does not exist\n";
+        return 1;
+    }
+
     CPU<ACC_MA> cpu;
-    cpu.loadProgram("code.s");
+    cpu.loadProgram(codePath);
     cpu.runProgram();
 }
