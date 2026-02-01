@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <stdexcept>
 #include <unordered_map>
 
 #include "Assembler.h"
@@ -40,6 +41,9 @@ class CPU {
     }
     void execute() {
         static auto& table = dispatch();
+        if (table.find(currOpcode) == table.end()) {
+            throw std::runtime_error("Invalid opcode: " + std::to_string(currOpcode));
+        }
         table[currOpcode](currData);
     }
 

@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -94,6 +95,10 @@ class Assembler {
             std::string instruction = text[i];
             const auto items = split(instruction);
             auto opcode = opcodeMap[items[0]];
+
+            if (opcodeMap.find(items[0]) == opcodeMap.end()) {
+                throw std::runtime_error("Invalid instruction: " + items[0]);
+            }
 
             if (items.size() == 2) {
                 std::string operand = items[1];
