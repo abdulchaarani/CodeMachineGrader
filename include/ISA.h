@@ -49,6 +49,7 @@ struct ACC_MA {
         {"brnz", 0x0F},
         {"shl", 0x10},
         {"shr", 0x11},
+        {"lea", 0x12},
         {"stop", 0x13},
     };
     // clang-format on

@@ -8,7 +8,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Enable compile commands for IntelliSense
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(code_machine_grader main.cpp)
+# Include directories
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+# Main executable
+add_executable(code_machine_grader 
+    src/main.cpp
+)
 
 set_target_properties(code_machine_grader PROPERTIES WIN32_EXECUTABLE OFF)
 

@@ -98,6 +98,7 @@ inline std::unordered_map<uint8_t, CPU<ACC_MA>::Instruction>& CPU<ACC_MA>::dispa
         {0x0F, [this](uint8_t ADR) { if (ACC != 0) PC = ADR; }},   // brnz
         {0x10, [this](uint8_t) { ACC <<= 1; }},                    // shl
         {0x11, [this](uint8_t) { ACC >>= 1; }},                    // shr
+        {0x12, [this](uint8_t ADR) { MA = ADR; }},                 // lea
         {0x13, [this](uint8_t) { isCpuRunning = false;}},          // stop
     };
     return table;
