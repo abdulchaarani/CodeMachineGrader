@@ -20,7 +20,7 @@ st result
 # incrementer decompte
 increment_count:
 ld count
-add 29 # one, works with literals
+add 23 # one, works with literals
 st count
 sub n
 brz end
@@ -37,19 +37,19 @@ ld result
 stop
 
 .data
-n: 6 # nbr elements dans nums
+n: 6 # nbr elements dans nums NE PAS MODIFIER LE NOM DE CETTE VARIABLE
 
-nums: 1   # nums[0]
-2   # nums[1]
-3   # nums[2]
-2   # nums[3]
-2   # nums[4]
-4   # nums[n - 1]
-
-target: 2 # chiffre à compter
+target: 2 # chiffre à compter NE PAS MODIFIER LE NOM DE CETTE VARIABLE
 result: 0
 
 one: 1
 count: 0
 
 pointeur: 21
+
+nums: 1   # nums[0] NE PAS MODIFIER LE NOM DE CETTE VARIABLE
+2   # nums[1]
+3   # nums[2]
+2   # nums[3]
+2   # nums[4]
+4   # nums[n - 1]
