@@ -18,6 +18,11 @@ class CPU {
 
    public:
     void loadProgram(const std::string& filename) {
+        std::filesystem::path file{filename};
+        if (!std::filesystem::exists(file)) {
+            throw std::runtime_error("File does not exist: " + filename);
+        }
+
         const auto program = Assembler<ISA>::assemble(filename);
         for (uint8_t i = 0; i < program.size(); ++i) {
             MEM[i] = program[i];
@@ -31,7 +36,6 @@ class CPU {
             decode();
             execute();
         }
-        std::cout << ACC << '\n';
     }
 
     void fetch() { IR = MEM[PC++]; };
@@ -50,6 +54,7 @@ class CPU {
    private:
     bool isCpuRunning = false;
 
+   public:
     uint16_t PC = 0;
     uint16_t IR = 0;
     uint16_t ACC = 0;
@@ -59,6 +64,7 @@ class CPU {
     uint8_t currOpcode = 0;
     uint8_t currData = 0;
 
+   private:
     std::unordered_map<uint8_t, Instruction>& dispatch();
 };
 

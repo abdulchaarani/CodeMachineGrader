@@ -52,12 +52,15 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
+        // Execute code on CPU variant:
         std::visit(
             [&codePath](auto& cpu) {
                 cpu.loadProgram(codePath);
                 cpu.runProgram();
+                std::cout << cpu.ACC << '\n';
             },
             cpu);
+
     } catch (const std::filesystem::filesystem_error& e) {
         std::cerr << "Filesystem error: " << e.what() << '\n';
         return 1;
