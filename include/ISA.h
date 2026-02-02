@@ -13,7 +13,7 @@ struct ACC {
     static constexpr uint8_t memorySize = UINT8_MAX;
 
     // clang-format off
-    static constexpr std::pair<const std::string, const uint8_t> opcodes[] = {
+   inline static const std::pair<const std::string, const uint8_t> opcodes[] = {
         {"add", 0x00},
         {"sub", 0x01},
         {"mul", 0x02},
@@ -30,7 +30,7 @@ struct ACC {
 
 struct ACC_MA {
     // clang-format off
-    static constexpr std::pair<const std::string, const uint8_t> opcodes[] = {
+    inline static const std::pair<const std::string, const uint8_t> opcodes[] = {
         {"add", 0x00},
         {"sub", 0x01},
         {"mul", 0x02},
