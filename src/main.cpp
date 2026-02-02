@@ -1,3 +1,8 @@
+#include <algorithm>
+#include <cctype>
+#include <exception>
+#include <filesystem>
+#include <iostream>
 #include <string>
 #include <variant>
 
@@ -39,27 +44,22 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        std::variant<CPU<ACC>, CPU<ACC_MA>> cpu;
-
         if (cpuType == "acc") {
-            cpu = CPU<ACC>{};
+            CPU<ACC> cpu;
+            cpu.loadProgram(codePath);
+            cpu.runProgram();
+            std::cout << cpu.ACC << '\n';
         } else if (cpuType == "ma") {
-            cpu = CPU<ACC_MA>{};
+            CPU<ACC_MA> cpu;
+            cpu.loadProgram(codePath);
+            cpu.runProgram();
+            std::cout << cpu.ACC << '\n';
         } else {
             std::cerr << "Error: Invalid CPU type '" << argv[1] << "'\n";
             std::cerr << "Valid types: acc, ma\n";
             printUsage(argv[0]);
             return 1;
         }
-
-        // Execute code on CPU variant:
-        std::visit(
-            [&codePath](auto& cpu) {
-                cpu.loadProgram(codePath);
-                cpu.runProgram();
-                std::cout << cpu.ACC << '\n';
-            },
-            cpu);
 
     } catch (const std::filesystem::filesystem_error& e) {
         std::cerr << "Filesystem error: " << e.what() << '\n';
@@ -74,8 +74,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "Error: " << e.what() << '\n';
         return 1;
     } catch (...) {
-        std::cerr
-            << "Error: An unknown error occurred. Verify that the code compiles on CodeMachine\n";
+        std::cerr << "Error: Please verify that the code first compiles in CodeMachine\n";
         return 1;
     }
 

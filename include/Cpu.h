@@ -17,6 +17,7 @@ class CPU {
     static constexpr uint8_t memorySize = UINT8_MAX;
 
    public:
+    CPU() { initializeDispatchTable(); }
     void loadProgram(const std::string& filename) {
         std::filesystem::path file{filename};
         if (!std::filesystem::exists(file)) {
@@ -40,15 +41,14 @@ class CPU {
 
     void fetch() { IR = MEM[PC++]; };
     void decode() {
-        currOpcode = IR >> 8;
-        currData = IR;
+        currOpcode = (IR >> 8) & 0xFF;
+        currData = IR & 0xFF;
     }
     void execute() {
-        static auto& table = dispatch();
-        if (table.find(currOpcode) == table.end()) {
-            throw std::runtime_error("Invalid opcode: " + std::to_string(currOpcode));
+        if (dispatchTable.find(currOpcode) == dispatchTable.end()) {
+            throw std::runtime_error("Invalid opcode");
         }
-        table[currOpcode](currData);
+        dispatchTable[currOpcode](currData);
     }
 
    private:
@@ -65,13 +65,16 @@ class CPU {
     uint8_t currData = 0;
 
    private:
-    std::unordered_map<uint8_t, Instruction>& dispatch();
+    std::unordered_map<uint8_t, Instruction> dispatchTable;
+
+   private:
+    void initializeDispatchTable();
 };
 
 // clang-format off
 template <>
-inline std::unordered_map<uint8_t, CPU<ACC>::Instruction>& CPU<ACC>::dispatch() {
-    static std::unordered_map<uint8_t, Instruction> table = {
+inline void CPU<ACC>::initializeDispatchTable() {
+    dispatchTable = {
         {0x00, [this](uint8_t ADR) { ACC += MEM[ADR]; }},           // add
         {0x01, [this](uint8_t ADR) { ACC -= MEM[ADR]; }},           // sub
         {0x02, [this](uint8_t ADR) { ACC *= MEM[ADR]; }},           // mul
@@ -82,14 +85,13 @@ inline std::unordered_map<uint8_t, CPU<ACC>::Instruction>& CPU<ACC>::dispatch() 
         {0x08, [this](uint8_t ADR) { if (ACC == 0) PC = ADR; }},    // brz
         {0x09, [this](uint8_t ADR) { if (ACC != 0) PC = ADR; }},    // brnz
     };
-    return table;
 }
 // clang-format on
 
 // clang-format off
 template <>
-inline std::unordered_map<uint8_t, CPU<ACC_MA>::Instruction>& CPU<ACC_MA>::dispatch() {
-    static std::unordered_map<uint8_t, Instruction> table = {
+inline void CPU<ACC_MA>::initializeDispatchTable() {
+    dispatchTable = {
         {0x00, [this](uint8_t ADR) { ACC += MEM[ADR]; }},           // add
         {0x01, [this](uint8_t ADR) { ACC -= MEM[ADR]; }},           // sub
         {0x02, [this](uint8_t ADR) { ACC *= MEM[ADR]; }},           // mul
@@ -111,6 +113,5 @@ inline std::unordered_map<uint8_t, CPU<ACC_MA>::Instruction>& CPU<ACC_MA>::dispa
         {0x12, [this](uint8_t ADR) { MA = ADR; }},                 // lea
         {0x13, [this](uint8_t) { isCpuRunning = false;}},          // stop
     };
-    return table;
 }
 // clang-format on

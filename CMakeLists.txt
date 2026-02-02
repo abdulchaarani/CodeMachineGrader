@@ -23,7 +23,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         -Wall 
         -Wextra 
         -Wpedantic 
-        -Wunicode
+        -finput-charset=UTF-8
         $<$<CONFIG:Debug>:-g3>
         $<$<CONFIG:Debug>:-O0>
     )
