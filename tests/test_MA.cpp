@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <filesystem>
 #include <string>
 
 #include "Assembler.h"
@@ -7,7 +8,7 @@
 #include "ISA.h"
 #include "test_helpers.h"
 
-static const std::string codePath = "../code_examples/code.s";
+std::string codePath;
 
 TEST(CountNumbers, BaseCase) {
     CPU<ACC_MA> cpu;
@@ -45,4 +46,36 @@ TEST(CountNumbers, BiggerArray) {
 
     cpu.runProgram();
     EXPECT_EQ(cpu.ACC, 6);
+}
+
+static void printUsage(const char* prog) {
+    std::cerr << "Usage:\n"
+              << "  " << prog << " --path <path>\n\n"
+              << "Example:\n"
+              << "  " << prog << " --path ../code_examples/code.s\n";
+}
+
+int main(int argc, char** argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+
+    for (int i = 1; i < argc; ++i) {
+        if (std::string(argv[i]) == "--path" && i + 1 < argc) {
+            codePath = argv[i + 1];
+            break;
+        }
+    }
+
+    if (codePath.empty()) {
+        printUsage(argv[0]);
+    }
+
+    else if (!std::filesystem::exists(codePath)) {
+        std::cerr << "Error: file does not exist: " << codePath << "\n";
+    }
+
+    else if (!std::filesystem::is_regular_file(codePath)) {
+        std::cerr << "Error: not a regular file: " << codePath << "\n";
+    }
+
+    return RUN_ALL_TESTS();
 }

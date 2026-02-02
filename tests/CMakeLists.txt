@@ -15,21 +15,21 @@ if (NOT GTest_FOUND)
     FetchContent_MakeAvailable(googletest)
 endif()
 
-add_executable(run_tests
-    test_code.cpp
+add_executable(test_MA
+    test_MA.cpp
 )
 
-target_link_libraries(run_tests
+target_link_libraries(test_MA
     GTest::gtest_main
     GTest::gtest
 )
 
-target_include_directories(run_tests PRIVATE
+target_include_directories(test_MA PRIVATE
     ${CMAKE_SOURCE_DIR}/include
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(run_tests PRIVATE 
+    target_compile_options(test_MA PRIVATE 
         -Wall 
         -Wextra 
         -Wpedantic
@@ -37,4 +37,4 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(run_tests)
+gtest_discover_tests(test_MA)
