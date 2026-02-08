@@ -39,16 +39,23 @@ class CPU {
         }
     }
 
-    void fetch() { IR = MEM[PC++]; };
+    void fetch() {
+        IR = MEM[PC++];
+        nCycles++;
+    };
+
     void decode() {
         currOpcode = (IR >> 8) & 0xFF;
         currData = IR & 0xFF;
+        nCycles++;
     }
+
     void execute() {
         if (dispatchTable.find(currOpcode) == dispatchTable.end()) {
             throw std::runtime_error("Invalid opcode");
         }
         dispatchTable[currOpcode](currData);
+        nCycles++;
     }
 
    private:
@@ -63,6 +70,8 @@ class CPU {
 
     uint8_t currOpcode = 0;
     uint8_t currData = 0;
+
+    uint16_t nCycles = 0;
 
    private:
     std::unordered_map<uint8_t, Instruction> dispatchTable;
