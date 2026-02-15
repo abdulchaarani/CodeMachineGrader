@@ -31,6 +31,14 @@ class Assembler {
             line = trim(line);
 
             size_t commentPos = line.find('#');
+            size_t slashCommentPos = line.find("//");
+
+            if (commentPos != std::string::npos && slashCommentPos != std::string::npos) {
+                commentPos = std::min(commentPos, slashCommentPos);
+            } else if (slashCommentPos != std::string::npos) {
+                commentPos = slashCommentPos;
+            }
+
             if (commentPos != std::string::npos) {
                 line = line.substr(0, commentPos);
                 line = trim(line);
