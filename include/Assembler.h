@@ -89,6 +89,10 @@ class Assembler {
     static std::vector<uint16_t> assemble(const std::string& filename) {
         auto prog = parseProgramLayout(filename);
 
+        return assemble(prog);
+    }
+
+    static std::vector<uint16_t> assemble(const ProgramLayout& prog) {
         std::vector<uint16_t> machineCode;
         machineCode.reserve(prog.text.size() + prog.data.size());
 
