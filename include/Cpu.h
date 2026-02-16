@@ -30,12 +30,27 @@ class CPU {
         }
     }
 
+    void loadProgramLayout(const ProgramLayout& prog) {
+        const auto program = Assembler<ISA>::assemble(prog);
+        for (uint8_t i = 0; i < program.size(); ++i) {
+            MEM[i] = program[i];
+        }
+    }
+
     void runProgram() {
         isCpuRunning = true;
         while (isCpuRunning) {
             fetch();
             decode();
             execute();
+
+            if (PC >= memorySize) {
+                throw std::runtime_error("Program counter out of bounds");
+            }
+
+            if (nCycles >= 1024) {
+                throw std::runtime_error("Exceeded maximum number of cycles");
+            }
         }
     }
 
