@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ISA.h"
+#include "architectures.h"
 
 struct ProgramLayout {
     std::vector<std::string> text;
@@ -15,8 +15,8 @@ struct ProgramLayout {
     std::unordered_map<std::string, uint16_t> labels;
 };
 
-template <InstructionSet ISA>
-class Assembler {
+template <AccLike ISA>
+class Assembler_ACC {
    public:
     static ProgramLayout parseProgramLayout(const std::string& filename) {
         std::ifstream infile(filename);

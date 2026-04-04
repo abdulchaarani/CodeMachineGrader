@@ -3,12 +3,12 @@
 #include <string>
 #include <unordered_map>
 
-#include "Assembler.h"
-#include "Cpu.h"
-#include "ISA.h"
+#include "Assembler/Assembler_ACCLike.h"
+#include "Cpu/Cpu_ACCLike.h"
+#include "architectures.h"
 
-template <InstructionSet ISA>
-void setVariable(CPU<ISA>& cpu, const ProgramLayout& prog, const std::string& varName,
+template <AccLike ISA>
+void setVariable(CPU_ACC<ISA>& cpu, const ProgramLayout& prog, const std::string& varName,
                  uint16_t value) {
     auto it = prog.labels.find(varName);
     if (it == prog.labels.end()) {
@@ -17,8 +17,8 @@ void setVariable(CPU<ISA>& cpu, const ProgramLayout& prog, const std::string& va
     cpu.MEM[it->second] = value;
 }
 
-template <InstructionSet ISA>
-void setArrayElement(CPU<ISA>& cpu, const ProgramLayout& prog, const std::string& arrayName,
+template <AccLike ISA>
+void setArrayElement(CPU_ACC<ISA>& cpu, const ProgramLayout& prog, const std::string& arrayName,
                      size_t index, uint16_t value) {
     auto it = prog.labels.find(arrayName);
     if (it == prog.labels.end()) {
@@ -27,8 +27,9 @@ void setArrayElement(CPU<ISA>& cpu, const ProgramLayout& prog, const std::string
     cpu.MEM[it->second + index] = value;
 }
 
-template <InstructionSet ISA>
-uint16_t getVariable(const CPU<ISA>& cpu, const ProgramLayout& prog, const std::string& varName) {
+template <AccLike ISA>
+uint16_t getVariable(const CPU_ACC<ISA>& cpu, const ProgramLayout& prog,
+                     const std::string& varName) {
     auto it = prog.labels.find(varName);
     if (it == prog.labels.end()) {
         throw std::runtime_error("Variable not found: " + varName);
@@ -36,8 +37,8 @@ uint16_t getVariable(const CPU<ISA>& cpu, const ProgramLayout& prog, const std::
     return cpu.MEM[it->second];
 }
 
-template <InstructionSet ISA>
-uint16_t getArrayElement(const CPU<ISA>& cpu, const ProgramLayout& prog,
+template <AccLike ISA>
+uint16_t getArrayElement(const CPU_ACC<ISA>& cpu, const ProgramLayout& prog,
                          const std::string& arrayName, size_t index) {
     auto it = prog.labels.find(arrayName);
     if (it == prog.labels.end()) {
@@ -46,8 +47,8 @@ uint16_t getArrayElement(const CPU<ISA>& cpu, const ProgramLayout& prog,
     return cpu.MEM[it->second + index];
 }
 
-template <InstructionSet ISA>
-void appendArrayElement(CPU<ISA>& cpu, const ProgramLayout& prog, const std::string& arrayName,
+template <AccLike ISA>
+void appendArrayElement(CPU_ACC<ISA>& cpu, const ProgramLayout& prog, const std::string& arrayName,
                         size_t index, uint16_t value) {
     auto it = prog.labels.find(arrayName);
     if (it == prog.labels.end()) {
@@ -57,8 +58,8 @@ void appendArrayElement(CPU<ISA>& cpu, const ProgramLayout& prog, const std::str
     cpu.MEM[it->second + index] = value;
 }
 
-template <InstructionSet ISA>
-std::vector<uint16_t> getArray(const CPU<ISA>& cpu, const ProgramLayout& prog,
+template <AccLike ISA>
+std::vector<uint16_t> getArray(const CPU_ACC<ISA>& cpu, const ProgramLayout& prog,
                                const std::string& arrayName, size_t arraySize) {
     auto it = prog.labels.find(arrayName);
     if (it == prog.labels.end()) {
@@ -74,8 +75,8 @@ std::vector<uint16_t> getArray(const CPU<ISA>& cpu, const ProgramLayout& prog,
 }
 
 // must set size first
-template <InstructionSet ISA>
-void setArray(CPU<ISA>& cpu, const ProgramLayout& prog, const std::string& arrayName,
+template <AccLike ISA>
+void setArray(CPU_ACC<ISA>& cpu, const ProgramLayout& prog, const std::string& arrayName,
               const std::vector<uint16_t>& values) {
     auto it = prog.labels.find(arrayName);
     if (it == prog.labels.end()) {
@@ -88,8 +89,9 @@ void setArray(CPU<ISA>& cpu, const ProgramLayout& prog, const std::string& array
     }
 }
 
-template <InstructionSet ISA>
-void clearMemoryPastLabel(CPU<ISA>& cpu, const ProgramLayout& prog, const std::string& arrayName) {
+template <AccLike ISA>
+void clearMemoryPastLabel(CPU_ACC<ISA>& cpu, const ProgramLayout& prog,
+                          const std::string& arrayName) {
     static constexpr uint8_t memorySize = UINT8_MAX;
 
     auto it = prog.labels.find(arrayName);

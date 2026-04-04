@@ -5,8 +5,11 @@
 #include <iostream>
 #include <string>
 
-#include "Cpu.h"
-#include "ISA.h"
+#include "Cpu/Cpu_ACCLike.h"
+#include "Cpu/Cpu_RiscLike.h"
+#include "ISA/ACC_MA.h"
+#include "ISA/PolyRisc.h"
+#include "architectures.h"
 
 std::string toLower(std::string str) {
     std::transform(str.begin(), str.end(), str.begin(),
@@ -44,15 +47,21 @@ int main(int argc, char* argv[]) {
         }
 
         if (cpuType == "acc") {
-            CPU<ACC> cpu;
+            CPU_ACC<ACC> cpu;
             cpu.loadProgram(codePath);
             cpu.runProgram();
             std::cout << cpu.ACC << '\n';
         } else if (cpuType == "ma") {
-            CPU<ACC_MA> cpu;
+            CPU_ACC<ACC_MA> cpu;
             cpu.loadProgram(codePath);
             cpu.runProgram();
             std::cout << cpu.ACC << '\n';
+        } else if (cpuType == "polyrisc") {
+            CPU_Risc<PolyRisc> cpu;
+            cpu.loadProgram(codePath);
+            cpu.runProgram();
+            std::cout << cpu.REG[0] << '\n';
+
         } else {
             std::cerr << "Error: Invalid CPU type '" << argv[1] << "'\n";
             std::cerr << "Valid types: acc, ma\n";

@@ -1,13 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <span>
 #include <string>
-
-template <typename T>
-concept InstructionSet = requires {
-    { std::span<const std::pair<const std::string, const uint8_t>>(T::opcodes) };
-};
 
 struct ACC {
     static constexpr uint8_t memorySize = UINT8_MAX;
@@ -29,6 +23,8 @@ struct ACC {
 };
 
 struct ACC_MA {
+    static constexpr uint8_t memorySize = UINT8_MAX;
+
     // clang-format off
     inline static const std::pair<const std::string, const uint8_t> opcodes[] = {
         {"add", 0x00},

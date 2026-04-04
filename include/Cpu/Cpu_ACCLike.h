@@ -8,30 +8,32 @@
 #include <stdexcept>
 #include <unordered_map>
 
-#include "Assembler.h"
-#include "ISA.h"
+#include "Assembler/Assembler_ACCLike.h"
+#include "ISA/ACC_MA.h"
+#include "architectures.h"
 
-template <InstructionSet ISA>
-class CPU {
+template <AccLike ISA>
+class CPU_ACC {
+    static constexpr uint16_t MAX_CYCLES = 1024;
     using Instruction = std::function<void(uint8_t)>;
     static constexpr uint8_t memorySize = UINT8_MAX;
 
    public:
-    CPU() { initializeDispatchTable(); }
+    CPU_ACC() { initializeDispatchTable(); }
     void loadProgram(const std::string& filename) {
         std::filesystem::path file{filename};
         if (!std::filesystem::exists(file)) {
             throw std::runtime_error("File does not exist: " + filename);
         }
 
-        const auto program = Assembler<ISA>::assemble(filename);
+        const auto program = Assembler_ACC<ISA>::assemble(filename);
         for (uint8_t i = 0; i < program.size(); ++i) {
             MEM[i] = program[i];
         }
     }
 
     void loadProgramLayout(const ProgramLayout& prog) {
-        const auto program = Assembler<ISA>::assemble(prog);
+        const auto program = Assembler_ACC<ISA>::assemble(prog);
         for (uint8_t i = 0; i < program.size(); ++i) {
             MEM[i] = program[i];
         }
@@ -43,18 +45,18 @@ class CPU {
             fetch();
             decode();
             execute();
-
-            if (PC >= memorySize) {
-                throw std::runtime_error("Program counter out of bounds");
-            }
-
-            if (nCycles >= 1024) {
-                throw std::runtime_error("Exceeded maximum number of cycles");
-            }
         }
     }
 
     void fetch() {
+        if (PC >= memorySize) {
+            throw std::runtime_error("Program counter out of bounds");
+        }
+
+        if (nCycles >= MAX_CYCLES) {
+            throw std::runtime_error("Exceeded maximum number of cycles");
+        }
+
         IR = MEM[PC++];
         nCycles++;
     };
@@ -97,7 +99,7 @@ class CPU {
 
 // clang-format off
 template <>
-inline void CPU<ACC>::initializeDispatchTable() {
+inline void CPU_ACC<ACC>::initializeDispatchTable() {
     dispatchTable = {
         {0x00, [this](uint8_t ADR) { ACC += MEM[ADR]; }},           // add
         {0x01, [this](uint8_t ADR) { ACC -= MEM[ADR]; }},           // sub
@@ -114,7 +116,7 @@ inline void CPU<ACC>::initializeDispatchTable() {
 
 // clang-format off
 template <>
-inline void CPU<ACC_MA>::initializeDispatchTable() {
+inline void CPU_ACC<ACC_MA>::initializeDispatchTable() {
     dispatchTable = {
         {0x00, [this](uint8_t ADR) { ACC += MEM[ADR]; }},           // add
         {0x01, [this](uint8_t ADR) { ACC -= MEM[ADR]; }},           // sub
