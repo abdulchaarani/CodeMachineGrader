@@ -19,7 +19,7 @@ std::string toLower(std::string str) {
 
 void printUsage(const char* programName) {
     std::cerr << "Usage: " << programName << " <cpu_type> <filepath>\n";
-    std::cerr << "  cpu_type: acc or ma (case-insensitive)\n";
+    std::cerr << "  cpu_type: acc, ma, polyrisc (case-insensitive)\n";
     std::cerr << "  filepath: path to assembly file (.s)\n";
     std::cerr << "\nExample:\n";
     std::cerr << "  " << programName << " acc code.s\n";

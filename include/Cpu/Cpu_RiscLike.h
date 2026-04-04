@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "Assembler/Assembler_RiskLike.h"
+#include "Assembler/Assembler_RiscLike.h"
 #include "architectures.h"
 
 template <RiscLike ISA>

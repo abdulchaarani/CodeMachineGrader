@@ -1,107 +1,70 @@
-
 #pragma once
+#include <stdexcept>
 #include <string>
-#include <unordered_map>
+#include <vector>
 
-#include "Assembler/Assembler_ACCLike.h"
-#include "Cpu/Cpu_ACCLike.h"
-#include "architectures.h"
-
-template <AccLike ISA>
-void setVariable(CPU_ACC<ISA>& cpu, const ProgramLayout& prog, const std::string& varName,
-                 uint16_t value) {
-    auto it = prog.labels.find(varName);
-    if (it == prog.labels.end()) {
-        throw std::runtime_error("Variable not found: " + varName);
-    }
-    cpu.MEM[it->second] = value;
+template <typename MEM_T, typename Layout_T>
+void setVariable(MEM_T& mem, const Layout_T& labels, const std::string& varName,
+                 typename MEM_T::value_type value) {
+    auto it = labels.find(varName);
+    if (it == labels.end()) throw std::runtime_error("Variable not found: " + varName);
+    mem[it->second] = value;
 }
 
-template <AccLike ISA>
-void setArrayElement(CPU_ACC<ISA>& cpu, const ProgramLayout& prog, const std::string& arrayName,
-                     size_t index, uint16_t value) {
-    auto it = prog.labels.find(arrayName);
-    if (it == prog.labels.end()) {
-        throw std::runtime_error("Array not found: " + arrayName);
-    }
-    cpu.MEM[it->second + index] = value;
+template <typename MEM_T, typename Layout_T>
+void setArrayElement(MEM_T& mem, const Layout_T& labels, const std::string& arrayName, size_t index,
+                     typename MEM_T::value_type value) {
+    auto it = labels.find(arrayName);
+    if (it == labels.end()) throw std::runtime_error("Array not found: " + arrayName);
+    mem[it->second + index] = value;
 }
 
-template <AccLike ISA>
-uint16_t getVariable(const CPU_ACC<ISA>& cpu, const ProgramLayout& prog,
-                     const std::string& varName) {
-    auto it = prog.labels.find(varName);
-    if (it == prog.labels.end()) {
-        throw std::runtime_error("Variable not found: " + varName);
-    }
-    return cpu.MEM[it->second];
+template <typename MEM_T, typename Layout_T>
+typename MEM_T::value_type getVariable(const MEM_T& mem, const Layout_T& labels,
+                                       const std::string& varName) {
+    auto it = labels.find(varName);
+    if (it == labels.end()) throw std::runtime_error("Variable not found: " + varName);
+    return mem[it->second];
 }
 
-template <AccLike ISA>
-uint16_t getArrayElement(const CPU_ACC<ISA>& cpu, const ProgramLayout& prog,
-                         const std::string& arrayName, size_t index) {
-    auto it = prog.labels.find(arrayName);
-    if (it == prog.labels.end()) {
-        throw std::runtime_error("Array not found: " + arrayName);
-    }
-    return cpu.MEM[it->second + index];
+template <typename MEM_T, typename Layout_T>
+typename MEM_T::value_type getArrayElement(const MEM_T& mem, const Layout_T& labels,
+                                           const std::string& arrayName, size_t index) {
+    auto it = labels.find(arrayName);
+    if (it == labels.end()) throw std::runtime_error("Array not found: " + arrayName);
+    return mem[it->second + index];
 }
 
-template <AccLike ISA>
-void appendArrayElement(CPU_ACC<ISA>& cpu, const ProgramLayout& prog, const std::string& arrayName,
-                        size_t index, uint16_t value) {
-    auto it = prog.labels.find(arrayName);
-    if (it == prog.labels.end()) {
-        throw std::runtime_error("Array not found");
-    }
-
-    cpu.MEM[it->second + index] = value;
+template <typename MEM_T, typename Layout_T>
+void appendArrayElement(MEM_T& mem, const Layout_T& labels, const std::string& arrayName,
+                        size_t index, typename MEM_T::value_type value) {
+    auto it = labels.find(arrayName);
+    if (it == labels.end()) throw std::runtime_error("Array not found: " + arrayName);
+    mem[it->second + index] = value;
 }
 
-template <AccLike ISA>
-std::vector<uint16_t> getArray(const CPU_ACC<ISA>& cpu, const ProgramLayout& prog,
-                               const std::string& arrayName, size_t arraySize) {
-    auto it = prog.labels.find(arrayName);
-    if (it == prog.labels.end()) {
-        throw std::runtime_error("Array not found: " + arrayName);
-    }
-
-    std::vector<uint16_t> result;
+template <typename MEM_T, typename Layout_T>
+std::vector<typename MEM_T::value_type> getArray(const MEM_T& mem, const Layout_T& labels,
+                                                 const std::string& arrayName, size_t arraySize) {
+    auto it = labels.find(arrayName);
+    if (it == labels.end()) throw std::runtime_error("Array not found: " + arrayName);
+    std::vector<typename MEM_T::value_type> result;
     result.reserve(arraySize);
-    for (size_t i = 0; i < arraySize; ++i) {
-        result.push_back(cpu.MEM[it->second + i]);
-    }
+    for (size_t i = 0; i < arraySize; ++i) result.push_back(mem[it->second + i]);
     return result;
 }
 
-// must set size first
-template <AccLike ISA>
-void setArray(CPU_ACC<ISA>& cpu, const ProgramLayout& prog, const std::string& arrayName,
-              const std::vector<uint16_t>& values) {
-    auto it = prog.labels.find(arrayName);
-    if (it == prog.labels.end()) {
-        throw std::runtime_error("Array not found: " + arrayName);
-    }
-
-    size_t startAddr = it->second;
-    for (size_t i = 0; i < values.size(); ++i) {
-        cpu.MEM[startAddr + i] = values[i];
-    }
+template <typename MEM_T, typename Layout_T>
+void setArray(MEM_T& mem, const Layout_T& labels, const std::string& arrayName,
+              const std::vector<typename MEM_T::value_type>& values) {
+    auto it = labels.find(arrayName);
+    if (it == labels.end()) throw std::runtime_error("Array not found: " + arrayName);
+    for (size_t i = 0; i < values.size(); ++i) mem[it->second + i] = values[i];
 }
 
-template <AccLike ISA>
-void clearMemoryPastLabel(CPU_ACC<ISA>& cpu, const ProgramLayout& prog,
-                          const std::string& arrayName) {
-    static constexpr uint8_t memorySize = UINT8_MAX;
-
-    auto it = prog.labels.find(arrayName);
-    if (it == prog.labels.end()) {
-        throw std::runtime_error("Array not found: " + arrayName);
-    }
-
-    size_t startAddr = it->second;
-
-    for (size_t i = startAddr; i < memorySize; ++i) {
-        cpu.MEM[i] = 0;
-    }
+template <typename MEM_T, typename Layout_T>
+void clearMemoryPastLabel(MEM_T& mem, const Layout_T& labels, const std::string& labelName) {
+    auto it = labels.find(labelName);
+    if (it == labels.end()) throw std::runtime_error("Label not found: " + labelName);
+    for (size_t i = it->second; i < mem.size(); ++i) mem[i] = {};
 }

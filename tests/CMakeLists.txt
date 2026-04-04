@@ -15,6 +15,9 @@ if (NOT GTest_FOUND)
     FetchContent_MakeAvailable(googletest)
 endif()
 
+###############
+# Test MA
+###############
 add_executable(test_MA
     test_MA.cpp
 )
@@ -38,3 +41,30 @@ endif()
 
 include(GoogleTest)
 gtest_discover_tests(test_MA)
+
+###############
+# Test PolyRisc
+###############
+add_executable(test_polyrisc
+    test_polyrisc.cpp
+)
+
+target_link_libraries(test_polyrisc
+    GTest::gtest_main
+    GTest::gtest
+)
+
+target_include_directories(test_polyrisc PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(test_polyrisc PRIVATE 
+        -Wall 
+        -Wextra 
+        -Wpedantic
+    )
+endif()
+
+include(GoogleTest)
+gtest_discover_tests(test_polyrisc)
