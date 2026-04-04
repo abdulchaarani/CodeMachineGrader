@@ -54,7 +54,7 @@ class CPU_Risc {
         if (PC >= Traits::IMEM_SIZE) throw std::runtime_error("Program counter out of bounds");
         if (nCycles >= Traits::MAX_CYCLES)
             throw std::runtime_error("Exceeded maximum number of cycles");
-        IR = IMEM[PC++];
+        IR = IMEM[PC];
         ++nCycles;
     }
 
@@ -122,6 +122,7 @@ class CPU_Risc {
         DataT result = it->second(a, b);
         REG[rdst] = result;
         updateFlags(result);
+        ++PC;
     }
 
     void executeLd() {
@@ -129,6 +130,7 @@ class CPU_Risc {
         if (addr >= Traits::DMEM_SIZE)
             throw std::runtime_error("Data memory read out of bounds: " + std::to_string(addr));
         REG[rdst] = DMEM[addr];
+        ++PC;
     }
 
     void executeSt() {
@@ -136,9 +138,13 @@ class CPU_Risc {
         if (addr >= Traits::DMEM_SIZE)
             throw std::runtime_error("Data memory write out of bounds: " + std::to_string(addr));
         DMEM[addr] = REG[rsrc2];
+        ++PC;
     }
 
-    void executeLdi() { REG[rdst] = static_cast<DataT>(disp16); }
+    void executeLdi() {
+        REG[rdst] = static_cast<DataT>(disp16);
+        ++PC;
+    }
 
     void executeJump() {
         bool taken = false;
@@ -165,6 +171,8 @@ class CPU_Risc {
             if (disp12 >= Traits::IMEM_SIZE)
                 throw std::runtime_error("Branch target out of bounds: " + std::to_string(disp12));
             PC = disp12;
+        } else {
+            ++PC;
         }
     }
 

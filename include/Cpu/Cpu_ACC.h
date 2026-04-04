@@ -50,7 +50,7 @@ class CPU_ACC {
         if (PC >= Traits::MEM_SIZE) throw std::runtime_error("Program counter out of bounds");
         if (nCycles >= Traits::MAX_CYCLES)
             throw std::runtime_error("Exceeded maximum number of cycles");
-        IR = MEM[PC++];
+        IR = MEM[PC];
         ++nCycles;
     }
 
@@ -89,41 +89,41 @@ class CPU_ACC {
 template <>
 inline void CPU_ACC<ACC>::initializeDispatchTable() {
     dispatchTable = {
-        {0x00, [this](uint8_t ADR) { ACC += MEM[ADR]; }},          // add
-        {0x01, [this](uint8_t ADR) { ACC -= MEM[ADR]; }},          // sub
-        {0x02, [this](uint8_t ADR) { ACC *= MEM[ADR]; }},          // mul
-        {0x03, [this](uint8_t ADR) { MEM[ADR] = ACC; }},           // st
-        {0x04, [this](uint8_t ADR) { ACC = MEM[ADR]; }},           // ld
-        {0x05, [this](uint8_t)     { isRunning = false; }},         // stop
-        {0x07, [this](uint8_t ADR) { PC = ADR; }},                  // br
-        {0x08, [this](uint8_t ADR) { if (ACC == 0) PC = ADR; }},    // brz
-        {0x09, [this](uint8_t ADR) { if (ACC != 0) PC = ADR; }},    // brnz
+        {0x00, [this](uint8_t ADR) { ACC += MEM[ADR]; ++PC; }},                // add
+        {0x01, [this](uint8_t ADR) { ACC -= MEM[ADR]; ++PC; }},                // sub
+        {0x02, [this](uint8_t ADR) { ACC *= MEM[ADR]; ++PC; }},                // mul
+        {0x03, [this](uint8_t ADR) { MEM[ADR] = ACC; ++PC; }},                 // st
+        {0x04, [this](uint8_t ADR) { ACC = MEM[ADR]; ++PC; }},                 // ld
+        {0x05, [this](uint8_t)     { isRunning = false; }},                    // stop
+        {0x07, [this](uint8_t ADR) { PC = ADR; }},                             // br
+        {0x08, [this](uint8_t ADR) { if (ACC == 0) PC = ADR; else ++PC; }},    // brz
+        {0x09, [this](uint8_t ADR) { if (ACC != 0) PC = ADR; else ++PC; }},    // brnz
     };
 }
 
 template <>
 inline void CPU_ACC<ACC_MA>::initializeDispatchTable() {
     dispatchTable = {
-        {0x00, [this](uint8_t ADR) { ACC += MEM[ADR]; }},          // add
-        {0x01, [this](uint8_t ADR) { ACC -= MEM[ADR]; }},          // sub
-        {0x02, [this](uint8_t ADR) { ACC *= MEM[ADR]; }},          // mul
-        {0x03, [this](uint8_t ADR) { MA  += MEM[ADR]; }},          // adda
-        {0x04, [this](uint8_t ADR) { MA  -= MEM[ADR]; }},          // suba
-        {0x05, [this](uint8_t)     { ACC += MEM[MA]; }},           // addx
-        {0x06, [this](uint8_t)     { ACC -= MEM[MA]; }},           // subx
-        {0x07, [this](uint8_t ADR) { ACC  = MEM[ADR]; }},          // ld
-        {0x08, [this](uint8_t ADR) { MEM[ADR] = ACC; }},           // st
-        {0x09, [this](uint8_t ADR) { MA   = MEM[ADR]; }},          // lda
-        {0x0A, [this](uint8_t ADR) { MEM[ADR] = MA; }},            // sta
-        {0x0B, [this](uint8_t)     { ACC  = MEM[MA]; }},           // ldi
-        {0x0C, [this](uint8_t)     { MEM[MA]  = ACC; }},           // sti
-        {0x0D, [this](uint8_t ADR) { PC = ADR; }},                  // br
-        {0x0E, [this](uint8_t ADR) { if (ACC == 0)  PC = ADR; }},   // brz
-        {0x0F, [this](uint8_t ADR) { if (ACC != 0)  PC = ADR; }},   // brnz
-        {0x10, [this](uint8_t)     { ACC <<= 1; }},                 // shl
-        {0x11, [this](uint8_t)     { ACC >>= 1; }},                 // shr
-        {0x12, [this](uint8_t ADR) { MA = ADR; }},                  // lea
-        {0x13, [this](uint8_t)     { isRunning = false; }},         // stop
+        {0x00, [this](uint8_t ADR) { ACC += MEM[ADR]; ++PC; }},                  // add
+        {0x01, [this](uint8_t ADR) { ACC -= MEM[ADR]; ++PC; }},                  // sub
+        {0x02, [this](uint8_t ADR) { ACC *= MEM[ADR]; ++PC; }},                  // mul
+        {0x03, [this](uint8_t ADR) { MA  += MEM[ADR]; ++PC; }},                  // adda
+        {0x04, [this](uint8_t ADR) { MA  -= MEM[ADR]; ++PC; }},                  // suba
+        {0x05, [this](uint8_t)     { ACC += MEM[MA]; ++PC; }},                   // addx
+        {0x06, [this](uint8_t)     { ACC -= MEM[MA]; ++PC; }},                   // subx
+        {0x07, [this](uint8_t ADR) { ACC  = MEM[ADR]; ++PC; }},                  // ld
+        {0x08, [this](uint8_t ADR) { MEM[ADR] = ACC; ++PC; }},                   // st
+        {0x09, [this](uint8_t ADR) { MA = MEM[ADR]; ++PC; }},                    // lda
+        {0x0A, [this](uint8_t ADR) { MEM[ADR] = MA; ++PC; }},                   // sta
+        {0x0B, [this](uint8_t)     { ACC  = MEM[MA]; ++PC; }},                  // ldi
+        {0x0C, [this](uint8_t)     { MEM[MA]  = ACC; ++PC; }},                  // sti
+        {0x0D, [this](uint8_t ADR) { PC = ADR; }},                              // br
+        {0x0E, [this](uint8_t ADR) { if (ACC == 0)  PC = ADR; else ++PC; }},    // brz
+        {0x0F, [this](uint8_t ADR) { if (ACC != 0)  PC = ADR; else ++PC; }},    // brnz
+        {0x10, [this](uint8_t)     { ACC <<= 1; ++PC; }},                       // shl
+        {0x11, [this](uint8_t)     { ACC >>= 1; ++PC; }},                       // shr
+        {0x12, [this](uint8_t ADR) { MA = ADR; ++PC; }},                        // lea
+        {0x13, [this](uint8_t)     { isRunning = false; }},                     // stop
     };
 }
 // clang-format on
