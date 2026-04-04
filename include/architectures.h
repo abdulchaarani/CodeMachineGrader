@@ -1,13 +1,9 @@
 #pragma once
 #include <concepts>
-#include <cstdint>
-#include <span>
-#include <string>
 
 template <typename T>
 concept AccLike = requires {
-    { std::span<const std::pair<const std::string, const uint8_t>>(T::opcodes) };
-    { T::memorySize } -> std::same_as<const uint8_t&>;
+    { T::opcodes };
 };
 
 template <typename T>

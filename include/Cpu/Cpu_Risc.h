@@ -6,20 +6,22 @@
 #include <stdexcept>
 #include <string>
 
-#include "Assembler/Assembler_RiscLike.h"
+#include "Assembler/Assembler.h"
+#include "CpuTraits.h"
 #include "architectures.h"
 
 template <RiscLike ISA>
 class CPU_Risc {
-    static constexpr uint16_t MAX_CYCLES = 1024;
+    using Traits = CpuTraits<ISA>;
+    using AddrT = typename Traits::AddrT;
+    using DataT = typename Traits::DataT;
+    using IRT = typename Traits::IRT;
 
    public:
     void loadProgram(const std::string& filename) {
         if (!std::filesystem::exists(filename))
             throw std::runtime_error("File does not exist: " + filename);
-
-        auto layout = Assembler_Risc<ISA>::parseProgramLayout(filename);
-        loadLayout(layout);
+        loadLayout(Assembler<ISA>::parseProgramLayout(filename));
     }
 
     void loadLayout(const ProgramLayoutRisc& layout) {
@@ -27,14 +29,14 @@ class CPU_Risc {
 
         uint32_t iAddr = 0;
         for (size_t i = 0; i < layout.text.size(); ++i) {
-            if (iAddr >= IMEM_SIZE) throw std::runtime_error("Instruction memory overflow");
+            if (iAddr >= Traits::IMEM_SIZE) throw std::runtime_error("Instruction memory overflow");
             IMEM[iAddr++] = words[i];
         }
 
         uint32_t dAddr = 0;
         for (size_t i = layout.text.size(); i < words.size(); ++i) {
-            if (dAddr >= DMEM_SIZE) throw std::runtime_error("Data memory overflow");
-            DMEM[dAddr++] = static_cast<int16_t>(words[i]);
+            if (dAddr >= Traits::DMEM_SIZE) throw std::runtime_error("Data memory overflow");
+            DMEM[dAddr++] = static_cast<DataT>(words[i]);
         }
     }
 
@@ -49,28 +51,25 @@ class CPU_Risc {
 
    private:
     void fetch() {
-        if (PC >= IMEM_SIZE) throw std::runtime_error("Program counter out of bounds");
-
-        if (nCycles >= MAX_CYCLES) {
+        if (PC >= Traits::IMEM_SIZE) throw std::runtime_error("Program counter out of bounds");
+        if (nCycles >= Traits::MAX_CYCLES)
             throw std::runtime_error("Exceeded maximum number of cycles");
-        }
-
         IR = IMEM[PC++];
-        nCycles++;
+        ++nCycles;
     }
 
     // clang-format off
     void decode() {
-        bits27_24   = (IR >> 24) & 0xF;
-        bit27       = (IR >> 27) & 0x1;
-        op_alu      = (IR >> 24) & 0x7;     // bits 26-24
-        rdst        = (IR >> 16) & 0x1F;    // bits 20-16
-        rsrc1       = (IR >> 8)  & 0x1F;    // bits 12-8
-        rsrc2       = (IR >> 0)  & 0x1F;    // bits 5-0
-        disp16      = (IR >> 0)  & 0xFFFF;  // bits 16-0
-        disp12      = (IR >> 0)  & 0xFFF;   // bits 12-0
-        jtype       = (IR >> 16) & 0xF;     // bits 19-16
-        nCycles++;
+        bits27_24 = (IR >> 24) & 0xF;
+        bit27     = (IR >> 27) & 0x1;
+        op_alu    = (IR >> 24) & 0x7;
+        rdst      = (IR >> 16) & 0x1F;
+        rsrc1     = (IR >>  8) & 0x1F;
+        rsrc2     = (IR >>  0) & 0x1F;
+        disp16    = (IR >>  0) & 0xFFFF;
+        disp12    = (IR >>  0) & 0xFFF;
+        jtype     = (IR >> 16) & 0xF;
+        ++nCycles;
     }
     // clang-format on
 
@@ -98,35 +97,48 @@ class CPU_Risc {
                     throw std::runtime_error("Unknown opcode nibble: " + std::to_string(bits27_24));
             }
         }
-        nCycles++;
+        ++nCycles;
     }
 
+   public:
+    AddrT PC = 0;
+    IRT IR = 0;
+
+    std::array<DataT, 32> REG{};
+    std::array<AddrT, Traits::IMEM_SIZE> IMEM{};
+    std::array<DataT, Traits::DMEM_SIZE> DMEM{};
+
+    bool flagZ = false;
+    bool flagN = false;
+    uint32_t nCycles = 0;
+
+   private:
     void executeALU() {
-        int16_t a = REG[rsrc1];
-        int16_t b = REG[rsrc2];
+        DataT a = REG[rsrc1];
+        DataT b = REG[rsrc2];
         auto it = ISA::aluTable.find(op_alu);
         if (it == ISA::aluTable.end())
             throw std::runtime_error("Unknown ALU op: " + std::to_string(op_alu));
-        int16_t result = it->second(a, b);
+        DataT result = it->second(a, b);
         REG[rdst] = result;
         updateFlags(result);
     }
 
     void executeLd() {
-        uint16_t addr = static_cast<uint16_t>(REG[rsrc1]);
-        if (addr >= DMEM_SIZE)
+        uint32_t addr = static_cast<uint32_t>(REG[rsrc1]);
+        if (addr >= Traits::DMEM_SIZE)
             throw std::runtime_error("Data memory read out of bounds: " + std::to_string(addr));
         REG[rdst] = DMEM[addr];
     }
 
     void executeSt() {
-        uint16_t addr = static_cast<uint16_t>(REG[rsrc1]);
-        if (addr >= DMEM_SIZE)
+        uint32_t addr = static_cast<uint32_t>(REG[rsrc1]);
+        if (addr >= Traits::DMEM_SIZE)
             throw std::runtime_error("Data memory write out of bounds: " + std::to_string(addr));
         DMEM[addr] = REG[rsrc2];
     }
 
-    void executeLdi() { REG[rdst] = static_cast<uint16_t>(disp16); }
+    void executeLdi() { REG[rdst] = static_cast<DataT>(disp16); }
 
     void executeJump() {
         bool taken = false;
@@ -136,57 +148,41 @@ class CPU_Risc {
                 break;  // br
             case 1:
                 taken = flagZ;
-                break;  // brz  — Z == 1
+                break;  // brz
             case 2:
                 taken = !flagZ;
-                break;  // brnz — Z == 0
+                break;  // brnz
             case 3:
                 taken = flagN;
-                break;  // brlz — N == 1
+                break;  // brlz
             case 4:
                 taken = !flagN;
-                break;  // brgez— N == 0
+                break;  // brgez
             default:
                 throw std::runtime_error("Unknown jtype: " + std::to_string(jtype));
         }
         if (taken) {
-            if (disp12 >= IMEM_SIZE)
+            if (disp12 >= Traits::IMEM_SIZE)
                 throw std::runtime_error("Branch target out of bounds: " + std::to_string(disp12));
             PC = disp12;
         }
     }
 
-    void updateFlags(int16_t result) {
+    void updateFlags(DataT result) {
         flagZ = (result == 0);
         flagN = (result < 0);
     }
 
-   public:
-    static constexpr uint32_t IMEM_SIZE = 4095;        // 12 bits
-    static constexpr uint32_t DMEM_SIZE = UINT16_MAX;  // 16 bits
-
-    uint32_t PC = 0;
-    uint32_t IR = 0;
-
-    std::array<int16_t, 32> REG{};
-    std::array<uint32_t, IMEM_SIZE> IMEM{};
-    std::array<int16_t, DMEM_SIZE> DMEM{};
-
-    bool flagZ = false;
-    bool flagN = false;
-
-    uint64_t nCycles = 0;
-
    private:
     bool isRunning = false;
 
-    uint32_t bits27_24 = 0;
-    uint32_t bit27 = 0;
-    uint32_t op_alu = 0;
-    uint32_t rdst = 0;
-    uint32_t rsrc1 = 0;
-    uint32_t rsrc2 = 0;
-    uint32_t disp16 = 0;
-    uint32_t disp12 = 0;
-    uint32_t jtype = 0;
+    AddrT bits27_24 = 0;
+    AddrT bit27 = 0;
+    AddrT op_alu = 0;
+    AddrT rdst = 0;
+    AddrT rsrc1 = 0;
+    AddrT rsrc2 = 0;
+    AddrT disp16 = 0;
+    AddrT disp12 = 0;
+    AddrT jtype = 0;
 };

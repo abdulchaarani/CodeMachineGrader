@@ -1,81 +1,28 @@
 #pragma once
 #include <cstdint>
-#include <fstream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+#include "Assembler/ProgramLayout.h"
+#include "Assembler/ProgramLayoutParser.h"
 #include "architectures.h"
-
-struct ProgramLayoutRisc {
-    std::vector<std::string> text;
-    std::vector<int32_t> data;
-    std::unordered_map<std::string, uint32_t> textLabels;
-    std::unordered_map<std::string, uint32_t> dataLabels;
-};
 
 template <RiscLike ISA>
 class Assembler_Risc {
    public:
-    static ProgramLayoutRisc parseProgramLayout(const std::string& filename) {
-        std::ifstream infile(filename);
-        if (!infile) throw std::runtime_error("Cannot open file: " + filename);
+    using Layout = ProgramLayoutRisc;
 
-        ProgramLayoutRisc prog;
-        std::string line;
-
-        uint32_t textAddress = 0;
-        uint32_t dataAddress = 0;
-
-        bool inText = false, inData = false;
-
-        while (std::getline(infile, line)) {
-            line = stripComment(trim(line));
-            if (line.empty()) continue;
-
-            if (line == ".text") {
-                inText = true;
-                inData = false;
-                continue;
-            }
-            if (line == ".data") {
-                inText = false;
-                inData = true;
-                continue;
-            }
-
-            if (line.ends_with(":")) {
-                prog.textLabels[line.substr(0, line.size() - 1)] = textAddress;
-                continue;
-            }
-
-            if (inText) {
-                prog.text.push_back(line);
-                textAddress++;
-            } else if (inData) {
-                auto parts = tokenise(line);
-                if (parts[0].ends_with(":")) {
-                    std::string label = parts[0].substr(0, parts[0].size() - 1);
-                    prog.dataLabels[label] = dataAddress;
-                    if (parts.size() > 1) {
-                        prog.data.push_back(std::stoi(parts[1]));
-                        dataAddress++;
-                    }
-                } else {
-                    prog.data.push_back(std::stoi(parts[0]));
-                    dataAddress++;
-                }
-            }
-        }
-        return prog;
+    static Layout parseProgramLayout(const std::string& filename) {
+        return ProgramLayoutParser::parse<Layout>(filename);
     }
 
     static std::vector<uint32_t> assemble(const std::string& filename) {
         return assemble(parseProgramLayout(filename));
     }
 
-    static std::vector<uint32_t> assemble(const ProgramLayoutRisc& prog) {
+    static std::vector<uint32_t> assemble(const Layout& prog) {
         std::vector<uint32_t> machineCode;
         machineCode.reserve(prog.text.size() + prog.data.size());
         for (const auto& line : prog.text)

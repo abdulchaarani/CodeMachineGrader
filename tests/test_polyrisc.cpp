@@ -4,16 +4,16 @@
 #include <random>
 #include <string>
 
-#include "Assembler/Assembler_RiscLike.h"
-#include "Cpu/Cpu_RiscLike.h"
+#include "Assembler/Assembler.h"
+#include "Cpu/Cpu.h"
 #include "ISA/PolyRisc.h"
 #include "test_helpers.h"
 
 std::string codePath;
 
 TEST(DecToHex, ExempleDeBase) {
-    auto program = Assembler_Risc<PolyRisc>::parseProgramLayout(codePath);
-    CPU_Risc<PolyRisc> cpu;
+    auto program = Assembler<PolyRisc>::parseProgramLayout(codePath);
+    CPU<PolyRisc> cpu;
     cpu.loadProgram(codePath);
 
     setVariable(cpu.DMEM, program.dataLabels, "valeur", 6699);
@@ -36,8 +36,8 @@ TEST(DecToHex, CasAleatoire) {
         static_cast<int16_t>((input >> 12) & 0xF),
     };
 
-    auto program = Assembler_Risc<PolyRisc>::parseProgramLayout(codePath);
-    CPU_Risc<PolyRisc> cpu;
+    auto program = Assembler<PolyRisc>::parseProgramLayout(codePath);
+    CPU<PolyRisc> cpu;
     cpu.loadProgram(codePath);
     setVariable(cpu.DMEM, program.dataLabels, "valeur", static_cast<int16_t>(input));
     cpu.runProgram();
@@ -47,8 +47,8 @@ TEST(DecToHex, CasAleatoire) {
 }
 
 TEST(DecToHex, NombreDeCycles) {
-    auto program = Assembler_Risc<PolyRisc>::parseProgramLayout(codePath);
-    CPU_Risc<PolyRisc> cpu;
+    auto program = Assembler<PolyRisc>::parseProgramLayout(codePath);
+    CPU<PolyRisc> cpu;
     cpu.loadProgram(codePath);
     cpu.runProgram();
 

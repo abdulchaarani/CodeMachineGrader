@@ -4,16 +4,16 @@
 #include <random>
 #include <string>
 
-#include "Assembler/Assembler_ACCLike.h"
-#include "Cpu/Cpu_ACCLike.h"
+#include "Assembler/Assembler.h"
+#include "Cpu/Cpu.h"
 #include "ISA/ACC_MA.h"
 #include "test_helpers.h"
 
 std::string codePath;
 
 TEST(InverserTableau, ExempleDeBasePair) {
-    auto program = Assembler_ACC<ACC_MA>::parseProgramLayout(codePath);
-    CPU_ACC<ACC_MA> cpu;
+    auto program = Assembler<ACC_MA>::parseProgramLayout(codePath);
+    CPU<ACC_MA> cpu;
     cpu.loadProgram(codePath);
 
     std::vector<uint16_t> values = {1, 2, 3, 4, 5, 6};
@@ -30,8 +30,8 @@ TEST(InverserTableau, ExempleDeBasePair) {
 }
 
 TEST(InverserTableau, TailleImpair) {
-    auto program = Assembler_ACC<ACC_MA>::parseProgramLayout(codePath);
-    CPU_ACC<ACC_MA> cpu;
+    auto program = Assembler<ACC_MA>::parseProgramLayout(codePath);
+    CPU<ACC_MA> cpu;
     cpu.loadProgram(codePath);
 
     std::vector<uint16_t> values = {1, 2, 3, 4, 5, 6, 7};
@@ -57,8 +57,8 @@ TEST(InverserTableau, TableauLargeAleatoire) {
         randomNumbers[i] = dist(gen);
     }
 
-    auto program = Assembler_ACC<ACC_MA>::parseProgramLayout(codePath);
-    CPU_ACC<ACC_MA> cpu;
+    auto program = Assembler<ACC_MA>::parseProgramLayout(codePath);
+    CPU<ACC_MA> cpu;
     cpu.loadProgram(codePath);
 
     clearMemoryPastLabel(cpu.MEM, program.labels, "nums");
@@ -74,8 +74,8 @@ TEST(InverserTableau, TableauLargeAleatoire) {
 }
 
 TEST(InverserTableau, MemeNombres) {
-    auto program = Assembler_ACC<ACC_MA>::parseProgramLayout(codePath);
-    CPU_ACC<ACC_MA> cpu;
+    auto program = Assembler<ACC_MA>::parseProgramLayout(codePath);
+    CPU<ACC_MA> cpu;
     cpu.loadProgram(codePath);
 
     std::vector<uint16_t> values = {4, 4, 4, 4};
@@ -92,8 +92,8 @@ TEST(InverserTableau, MemeNombres) {
 }
 
 TEST(InverserTableau, AvecZeros) {
-    auto program = Assembler_ACC<ACC_MA>::parseProgramLayout(codePath);
-    CPU_ACC<ACC_MA> cpu;
+    auto program = Assembler<ACC_MA>::parseProgramLayout(codePath);
+    CPU<ACC_MA> cpu;
     cpu.loadProgram(codePath);
 
     std::vector<uint16_t> values = {0, 1, 0, 2};
@@ -110,8 +110,8 @@ TEST(InverserTableau, AvecZeros) {
 }
 
 TEST(InverserTableau, NombreDeCycles) {
-    auto program = Assembler_ACC<ACC_MA>::parseProgramLayout(codePath);
-    CPU_ACC<ACC_MA> cpu;
+    auto program = Assembler<ACC_MA>::parseProgramLayout(codePath);
+    CPU<ACC_MA> cpu;
     cpu.loadProgram(codePath);
 
     std::vector<uint16_t> values = {1, 2, 3, 4, 5, 6};
