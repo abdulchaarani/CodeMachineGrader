@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <filesystem>
+#include <cstdlib>
 #include <random>
 #include <string>
 
@@ -9,7 +9,10 @@
 #include "ISA/ACC_MA.h"
 #include "test_helpers.h"
 
-std::string codePath;
+const std::string codePath = [] {
+    const char* env = std::getenv("CODE_PATH");
+    return std::string(env ? env : CODE_PATH_DEFAULT);
+}();
 
 TEST(InverserTableau, ExempleDeBasePair) {
     auto program = Assembler<ACC_MA>::parseProgramLayout(codePath);
@@ -125,37 +128,3 @@ TEST(InverserTableau, NombreDeCycles) {
     EXPECT_LE(cpu.nCycles, 225);
 }
 
-static void printUsage(const char* prog) {
-    std::cerr << "Usage:\n"
-              << "  ." << prog << " --path <path>\n\n"
-              << "Example:\n"
-              << "  ." << prog << " --path ../code_examples/code.s\n";
-}
-
-int main(int argc, char** argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-
-    codePath = "../code_examples/ma.s";  // default
-
-    for (int i = 1; i < argc; ++i) {
-        if (std::string(argv[i]) == "--path" && i + 1 < argc) {
-            codePath = argv[i + 1];
-            break;
-        }
-    }
-
-    if (codePath.empty()) {
-        printUsage(argv[0]);
-        return 1;
-    }
-
-    else if (!std::filesystem::exists(codePath)) {
-        std::cerr << "Error: file does not exist: " << codePath << "\n";
-    }
-
-    else if (!std::filesystem::is_regular_file(codePath)) {
-        std::cerr << "Error: not a regular file: " << codePath << "\n";
-    }
-
-    return RUN_ALL_TESTS();
-}

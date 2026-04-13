@@ -26,8 +26,8 @@ stop
 
 .data
 n:     6
-table: 3 7 2 9 4 8
-diff:  0 0 0 0 0
+table: 3 7 2 9 4 8 0 0 0 0
+diff:  0 0 0 0 0 0 0 0 0
 
 # === RÉSULTATS ATTENDUS ===
 # diff[0] =  4   (7-3)

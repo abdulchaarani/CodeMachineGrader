@@ -30,6 +30,10 @@ target_include_directories(test_ACC PRIVATE
     ${CMAKE_SOURCE_DIR}/include
 )
 
+target_compile_definitions(test_ACC PRIVATE
+    CODE_PATH_DEFAULT="${CMAKE_SOURCE_DIR}/code_examples/acc.s"
+)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(test_ACC PRIVATE 
         -Wall 
@@ -39,7 +43,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(test_ACC)
+gtest_discover_tests(test_ACC DISCOVERY_MODE PRE_TEST)
 
 ###############
 # Test MA
@@ -57,6 +61,10 @@ target_include_directories(test_MA PRIVATE
     ${CMAKE_SOURCE_DIR}/include
 )
 
+target_compile_definitions(test_MA PRIVATE
+    CODE_PATH_DEFAULT="${CMAKE_SOURCE_DIR}/code_examples/ma.s"
+)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(test_MA PRIVATE 
         -Wall 
@@ -66,7 +74,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(test_MA)
+gtest_discover_tests(test_MA DISCOVERY_MODE PRE_TEST)
 
 ###############
 # Test PolyRisc
@@ -84,6 +92,10 @@ target_include_directories(test_polyrisc PRIVATE
     ${CMAKE_SOURCE_DIR}/include
 )
 
+target_compile_definitions(test_polyrisc PRIVATE
+    CODE_PATH_DEFAULT="${CMAKE_SOURCE_DIR}/code_examples/polyrisc.s"
+)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(test_polyrisc PRIVATE 
         -Wall 
@@ -93,4 +105,4 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(test_polyrisc)
+gtest_discover_tests(test_polyrisc DISCOVERY_MODE PRE_TEST)
