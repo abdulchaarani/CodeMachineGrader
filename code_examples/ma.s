@@ -1,3 +1,4 @@
+# Solution possible: inverser un tableau [MA]
 .text
 # i pointe vers le debut du tableau
 # i = adr(nums)

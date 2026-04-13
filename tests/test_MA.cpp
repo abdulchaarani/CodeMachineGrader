@@ -144,9 +144,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    std::cout << codePath << '\n';
-    std::cout << codePath.empty() << '\n';
-
     if (codePath.empty()) {
         printUsage(argv[0]);
         return 1;

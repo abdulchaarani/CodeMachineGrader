@@ -1,37 +1,37 @@
+# Solution possible: Encodage différentiel [PolyRisc]
 .text
 ldi r8, 1
-ldi r1, valeur
-ld  r1, (r1)        # r1 = valeur décimale
-ldi r2, masque
-ld  r2, (r2)        # r2 = 0xF
-ldi r3, hex         # r3 = adresse base de hex[]
-ldi r4, nb_nibbles
-ld  r4, (r4)        # r4 = compteur (4 nibbles)
+ldi r1, n
+ld  r1, (r1)        # r1 = n
+sub r1, r1, r8      # r1 = n-1 (nombre de différences)
+ldi r2, table       # r2 = pointeur sur table[i]
+ldi r3, diff        # r3 = pointeur sur diff[i]
 
 # Votre code ici
 
 boucle:
-and r5, r1, r2      # r5 = nibble = r1 & 0xF
-st  (r3), r5        # hex[i] = nibble
-shr r1, r1          # décaler de 4 bits (4x shr)
-shr r1, r1
-shr r1, r1
-shr r1, r1
-add r3, r3, r8      # pointeur++
-sub r4, r4, r8      # compteur--
+ld  r4, (r2)        # r4 = table[i]
+mv  r5, r2
+add r5, r5, r8      # r5 = adresse table[i+1]
+ld  r5, (r5)        # r5 = table[i+1]
+sub r6, r5, r4      # r6 = table[i+1] - table[i]
+st  (r3), r6        # diff[i] = r6
+add r2, r2, r8      # pointeur table++
+add r3, r3, r8      # pointeur diff++
+sub r1, r1, r8      # compteur--
 brnz boucle
 
 done:
 stop
 
 .data
-valeur:     6699    # 0x1A2B
-masque:     15      # 0xF
-nb_nibbles: 4
-hex:        0 0 0 0
+n:     6
+table: 3 7 2 9 4 8
+diff:  0 0 0 0 0
 
 # === RÉSULTATS ATTENDUS ===
-# hex[0] = 11  (B, nibble de poids faible)
-# hex[1] =  2  (2)
-# hex[2] = 10  (A)
-# hex[3] =  1  (1)
+# diff[0] =  4   (7-3)
+# diff[1] = -5   (2-7)
+# diff[2] =  7   (9-2)
+# diff[3] = -5   (4-9)
+# diff[4] =  4   (8-4)

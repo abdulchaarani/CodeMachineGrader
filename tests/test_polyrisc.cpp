@@ -11,48 +11,74 @@
 
 std::string codePath;
 
-TEST(DecToHex, ExempleDeBase) {
+TEST(EncodageDiff, ExempleDeBase) {
     auto program = Assembler<PolyRisc>::parseProgramLayout(codePath);
     CPU<PolyRisc> cpu;
     cpu.loadProgram(codePath);
 
-    setVariable(cpu.DMEM, program.dataLabels, "valeur", 6699);
-
+    setVariable(cpu.DMEM, program.dataLabels, "n", 6);
+    setArray(cpu.DMEM, program.dataLabels, "table", {3, 7, 2, 9, 4, 8});
     cpu.runProgram();
 
-    std::vector<int16_t> result = getArray(cpu.DMEM, program.dataLabels, "hex", 4);
-    std::vector<int16_t> expected{11, 2, 10, 1};
+    std::vector<int16_t> result = getArray(cpu.DMEM, program.dataLabels, "diff", 5);
+    std::vector<int16_t> expected{4, -5, 7, -5, 4};
     EXPECT_EQ(result, expected);
 }
 
-TEST(DecToHex, CasAleatoire) {
-    srand(static_cast<unsigned>(time(nullptr)));
-    uint16_t input = rand() % 65536;
-
-    std::vector<int16_t> expected = {
-        static_cast<int16_t>((input >> 0) & 0xF),
-        static_cast<int16_t>((input >> 4) & 0xF),
-        static_cast<int16_t>((input >> 8) & 0xF),
-        static_cast<int16_t>((input >> 12) & 0xF),
-    };
-
+TEST(EncodageDiff, NombreDeCycles) {
     auto program = Assembler<PolyRisc>::parseProgramLayout(codePath);
     CPU<PolyRisc> cpu;
     cpu.loadProgram(codePath);
-    setVariable(cpu.DMEM, program.dataLabels, "valeur", static_cast<int16_t>(input));
     cpu.runProgram();
 
-    std::vector<int16_t> result = getArray(cpu.DMEM, program.dataLabels, "hex", 4);
+    EXPECT_LE(cpu.nCycles, 222);
+}
+
+TEST(EncodageDiff, CasAleatoireTailleFixe) {
+    auto program = Assembler<PolyRisc>::parseProgramLayout(codePath);
+    CPU<PolyRisc> cpu;
+    cpu.loadProgram(codePath);
+
+    std::mt19937 rng(std::random_device{}());
+    std::uniform_int_distribution<int16_t> dist(-50, 50);
+
+    constexpr int n = 6;
+    std::vector<int16_t> table(n);
+    for (auto& v : table) v = dist(rng);
+
+    setVariable(cpu.DMEM, program.dataLabels, "n", n);
+    setArray(cpu.DMEM, program.dataLabels, "table", table);
+    cpu.runProgram();
+
+    std::vector<int16_t> expected(n - 1);
+    for (int i = 0; i < n - 1; ++i) expected[i] = table[i + 1] - table[i];
+
+    std::vector<int16_t> result = getArray(cpu.DMEM, program.dataLabels, "diff", n - 1);
     EXPECT_EQ(result, expected);
 }
 
-TEST(DecToHex, NombreDeCycles) {
+TEST(EncodageDiff, CasAleatoireTailleVariable) {
     auto program = Assembler<PolyRisc>::parseProgramLayout(codePath);
     CPU<PolyRisc> cpu;
     cpu.loadProgram(codePath);
+
+    std::mt19937 rng(std::random_device{}());
+    std::uniform_int_distribution<int> sizeDist(2, 10);
+    std::uniform_int_distribution<int16_t> dist(-50, 50);
+
+    const int n = sizeDist(rng);
+    std::vector<int16_t> table(n);
+    for (auto& v : table) v = dist(rng);
+
+    setVariable(cpu.DMEM, program.dataLabels, "n", n);
+    setArray(cpu.DMEM, program.dataLabels, "table", table);
     cpu.runProgram();
 
-    EXPECT_LE(cpu.nCycles, 156);
+    std::vector<int16_t> expected(n - 1);
+    for (int i = 0; i < n - 1; ++i) expected[i] = table[i + 1] - table[i];
+
+    std::vector<int16_t> result = getArray(cpu.DMEM, program.dataLabels, "diff", n - 1);
+    EXPECT_EQ(result, expected);
 }
 
 static void printUsage(const char* prog) {
@@ -73,9 +99,6 @@ int main(int argc, char** argv) {
             break;
         }
     }
-
-    std::cout << codePath << '\n';
-    std::cout << codePath.empty() << '\n';
 
     if (codePath.empty()) {
         printUsage(argv[0]);
