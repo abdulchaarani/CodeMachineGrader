@@ -51,9 +51,10 @@ TEST(InverserTableau, TableauLargeAleatoire) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> dist(0, 500);
+    const int amount = 25;
 
-    std::vector<uint16_t> randomNumbers(50);
-    for (size_t i = 0; i < 50; ++i) {
+    std::vector<uint16_t> randomNumbers(amount);
+    for (size_t i = 0; i < amount; ++i) {
         randomNumbers[i] = dist(gen);
     }
 

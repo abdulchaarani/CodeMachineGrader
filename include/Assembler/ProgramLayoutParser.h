@@ -46,8 +46,8 @@ class ProgramLayoutParser {
                     std::string label = parts[0].substr(0, parts[0].size() - 1);
                     prog.addLabel(label, false);
 
-                    if (parts.size() > 1) {
-                        prog.addData(std::stoi(parts[1]));
+                    for (size_t i = 1; i < parts.size(); ++i) {
+                        prog.addData(std::stoi(parts[i]));
                     }
                 } else {
                     prog.addData(std::stoi(parts[0]));
