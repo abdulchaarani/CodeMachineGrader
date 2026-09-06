@@ -13,7 +13,7 @@ struct CpuTraits<ACC> {
     using DataT = uint16_t;
     using IRT = uint16_t;
 
-    static constexpr uint32_t MAX_CYCLES = 1024;
+    static constexpr uint32_t MAX_CYCLES = 4096;
     static constexpr uint32_t MEM_SIZE = UINT8_MAX;
 };
 
@@ -23,7 +23,7 @@ struct CpuTraits<ACC_MA> {
     using DataT = uint16_t;
     using IRT = uint16_t;
 
-    static constexpr uint32_t MAX_CYCLES = 1024;
+    static constexpr uint32_t MAX_CYCLES = 4096;
     static constexpr uint32_t MEM_SIZE = UINT8_MAX;
 };
 
@@ -33,7 +33,7 @@ struct CpuTraits<PolyRisc> {
     using DataT = int16_t;
     using IRT = uint32_t;
 
-    static constexpr uint32_t MAX_CYCLES = 1024;
+    static constexpr uint32_t MAX_CYCLES = 4096;
     static constexpr uint32_t IMEM_SIZE = 4095;        // 12-bit
     static constexpr uint32_t DMEM_SIZE = UINT16_MAX;  // 16-bit
 };
