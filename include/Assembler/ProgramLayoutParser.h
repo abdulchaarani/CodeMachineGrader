@@ -16,6 +16,7 @@ class ProgramLayoutParser {
         std::string line;
 
         bool inText = false, inData = false;
+        bool containsText = false, containsData = false;
 
         while (std::getline(infile, line)) {
             line = stripComment(trim(line));
@@ -24,11 +25,13 @@ class ProgramLayoutParser {
             if (line == ".text") {
                 inText = true;
                 inData = false;
+                containsText = true;
                 continue;
             }
             if (line == ".data") {
                 inText = false;
                 inData = true;
+                containsData = true;
                 continue;
             }
 
@@ -53,6 +56,14 @@ class ProgramLayoutParser {
                     prog.addData(std::stoi(parts[0]));
                 }
             }
+        }
+
+        if (!containsText){
+            throw std::runtime_error("Missing .text section");
+        }
+
+        if (!containsData){
+            throw std::runtime_error("Missing .data section");
         }
 
         return prog;
